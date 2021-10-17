@@ -49,6 +49,7 @@ function lookForMissingEventsFromContract() {
 }
 
 function main() {
+    console.log("started at", new Date().toISOString())
     console.time(label);
     const url = "https://bsc-dataseed.binance.org/";
     const provider = new ethers.providers.JsonRpcProvider(url);
