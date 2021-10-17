@@ -1,0 +1,28 @@
+{
+  "name": "ethers.js-discussions-2167",
+  "version": "1.0.0",
+  "description": "https://github.com/ethers-io/ethers.js/discussions/2167",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/claasahl/ethers.js-discussions-2167.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/claasahl/ethers.js-discussions-2167/issues"
+  },
+  "homepage": "https://github.com/claasahl/ethers.js-discussions-2167#readme",
+  "devDependencies": {
+    "@types/node": "^16.11.1",
+    "ts-node": "^10.3.0",
+    "typescript": "^4.4.4"
+  },
+  "dependencies": {
+    "ethers": "^5.4.7"
+  }
+}
