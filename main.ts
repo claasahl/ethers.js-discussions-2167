@@ -44,7 +44,7 @@ function lookForMissingEventsFromContract() {
             state.delete(key); // <-- trying to keep the state/cache as small as possible
             continue;
         } else {
-            console.timeLog("found missing event", key, value);
+            console.timeLog(label, "found missing event", key, value);
             process.exit(1);
         }
     }
