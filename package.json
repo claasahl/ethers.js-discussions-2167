@@ -2,9 +2,9 @@
   "name": "ethers.js-discussions-2167",
   "version": "1.0.0",
   "description": "https://github.com/ethers-io/ethers.js/discussions/2167",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "ts-node main.ts > ./logs/started-at-`date +%Y-%m-%dT%H-%M-%S`.log"
   },
   "repository": {
     "type": "git",
