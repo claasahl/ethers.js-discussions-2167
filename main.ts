@@ -33,10 +33,10 @@ function onSyncEventsFromQueryFilter(events: ethers.Event[]): void {
 }
 
 function lookForMissingEventsFromContract() {
-    const tenSeconds = 10000;
+    const oneMinute = 60000;
     for (const [key, value] of state.entries()) {
         const now = Date.now();
-        if (now - tenSeconds < value.received) {
+        if (now - oneMinute < value.received) {
             // let's wait for the timeout
         } else if (value.fromContract && value.fromQueryFilter) {
             // event was received via contract.on(...) and contract.queryFilter(...)
@@ -44,7 +44,7 @@ function lookForMissingEventsFromContract() {
             state.delete(key); // <-- trying to keep the state/cache as small as possible
             continue;
         } else {
-            console.log("found missing event", key, value);
+            console.timeLog("found missing event", key, value);
             process.exit(1);
         }
     }
