@@ -36,14 +36,16 @@ function lookForMissingEventsFromContract() {
     const tenSeconds = 10000;
     for (const [key, value] of state.entries()) {
         const now = Date.now();
-        if (value.fromContract && value.fromQueryFilter) {
+        if (now - tenSeconds < value.received) {
+            // let's wait for the timeout
+        } else if (value.fromContract && value.fromQueryFilter) {
             // event was received via contract.on(...) and contract.queryFilter(...)
             // i.e. everything is just fine :)
+            state.delete(key); // <-- trying to keep the state/cache as small as possible
             continue;
-        } else if (value.received < now - tenSeconds) {
-            console.timeLog(label, "this is NOT fine", key, value)
         } else {
-            // let's wait for the timeout
+            console.log("found missing event", key, value);
+            process.exit(1);
         }
     }
 }
