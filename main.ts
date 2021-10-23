@@ -55,13 +55,10 @@ function lookForMissingEventsFromContract(callback: (state: State) => void) {
 }
 
 function main() {
-    const pollingInterval = 8000;
-    console.log(`pollingInterval=${pollingInterval}`);
     console.log("started at", new Date().toISOString());
     console.time(label);
     const url = "https://bsc-dataseed.binance.org/";
     const provider = new ethers.providers.JsonRpcProvider(url);
-    provider.pollingInterval = pollingInterval;
     const contract = new ethers.Contract("0x8fa59693458289914db0097f5f366d771b7a7c3f", [
         "event Sync(uint112 reserve0, uint112 reserve1)"
     ], provider)
