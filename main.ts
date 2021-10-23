@@ -94,7 +94,5 @@ function main() {
             onSyncEventsFromQueryFilter(events);
         })
     })
-    provider.on("poll", (pollId, blockNumber) => console.log(`polling ${pollId} (${blockNumber})`));
-    provider.on("didPoll", pollId => console.log(`polled  ${pollId}`));
 }
 main();
