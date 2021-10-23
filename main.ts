@@ -8,9 +8,9 @@ type State = {
 const state = new Map<string, State>();
 const label = "SYNC-EVENT";
 
-function onSyncEventFromContract(reserve0: ethers.BigNumber, reserve1: ethers.BigNumber): void {
+function onSyncEventFromContract(reserve0: ethers.BigNumber, reserve1: ethers.BigNumber, event: ethers.Event): void {
     const key = `${reserve0},${reserve1}`;
-    console.log("fromContract   ", key);
+    console.log("fromContract   ", key, event.blockNumber);
     const value = state.get(key);
     state.set(key, {
         fromContract: true, // <-- mark event as "received via contract.on(...)"
@@ -22,7 +22,7 @@ function onSyncEventFromContract(reserve0: ethers.BigNumber, reserve1: ethers.Bi
 function onSyncEventsFromQueryFilter(events: ethers.Event[]): void {
     for (const event of events) {
         const key = `${event.args?.reserve0},${event.args?.reserve1}`;
-        console.log("fromQueryFilter", key);
+        console.log("fromQueryFilter", key, event.blockNumber);
         const value = state.get(key);
         state.set(key, {
             fromContract: value?.fromContract,
