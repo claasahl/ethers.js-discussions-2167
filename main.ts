@@ -1,8 +1,8 @@
 import { ethers } from "ethers";
 
 type State = {
-    fromContract: true | undefined,
-    fromQueryFilter: true | undefined,
+    fromContract: number | undefined,
+    fromQueryFilter: number | undefined,
     received: number
 }
 const state = new Map<string, State>();
@@ -13,7 +13,7 @@ function onSyncEventFromContract(reserve0: ethers.BigNumber, reserve1: ethers.Bi
     console.log("fromContract   ", key, event.blockNumber);
     const value = state.get(key);
     state.set(key, {
-        fromContract: true, // <-- mark event as "received via contract.on(...)"
+        fromContract: event.blockNumber, // <-- mark event as "received via contract.on(...)"
         fromQueryFilter: value?.fromQueryFilter,
         received: Date.now()
     })
@@ -26,7 +26,7 @@ function onSyncEventsFromQueryFilter(events: ethers.Event[]): void {
         const value = state.get(key);
         state.set(key, {
             fromContract: value?.fromContract,
-            fromQueryFilter: true, // <-- mark event as "received via contact.queryFilter(...)"
+            fromQueryFilter: event.blockNumber, // <-- mark event as "received via contact.queryFilter(...)"
             received: Date.now()
         })
     }
@@ -36,7 +36,7 @@ function onErrorFromContract(error: Error, event: ethers.Event): void {
     console.log("fromContract >> error:", error, event)
 }
 
-function lookForMissingEventsFromContract() {
+function lookForMissingEventsFromContract(callback: (state: State) => void) {
     const oneMinute = 60000;
     for (const [key, value] of state.entries()) {
         const now = Date.now();
@@ -49,7 +49,7 @@ function lookForMissingEventsFromContract() {
             continue;
         } else {
             console.timeLog(label, "found missing event", key, value);
-            process.exit(1);
+            callback(value);
         }
     }
 }
@@ -72,9 +72,23 @@ function main() {
 
     // poll "Sync" events for reference
     const filter = contract.filters["Sync"]();
+    const onMissingEvent = (value: State) => {
+        const blockNumber = value.fromContract || value.fromQueryFilter || 0;
+        provider.getLogs({
+            ...filter,
+            fromBlock: blockNumber,
+            toBlock: blockNumber
+        }).then(logs => {
+            console.log(">>> logs", logs);
+            process.exit(1);
+        }).catch(err => {
+            console.log(">>> err", err);
+            process.exit(1);
+        })
+    }
     provider.on("block", blockNumber => {
         console.log("new block", blockNumber);
-        lookForMissingEventsFromContract(); // <-- use "block"-events as the driving force to (re-)check for missing events
+        lookForMissingEventsFromContract(onMissingEvent); // <-- use "block"-events as the driving force to (re-)check for missing events
         setImmediate(async () => {
             const events = await contract.queryFilter(filter, blockNumber);
             onSyncEventsFromQueryFilter(events);
