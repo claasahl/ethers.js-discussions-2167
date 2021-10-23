@@ -32,6 +32,10 @@ function onSyncEventsFromQueryFilter(events: ethers.Event[]): void {
     }
 }
 
+function onErrorFromContract(error: Error, event: ethers.Event): void {
+    console.log("fromContract >> error:", error, event)
+}
+
 function lookForMissingEventsFromContract() {
     const oneMinute = 60000;
     for (const [key, value] of state.entries()) {
@@ -64,6 +68,7 @@ function main() {
 
     // eventually, this will skip "Sync" events
     contract.on("Sync", onSyncEventFromContract);
+    contract.on("error", onErrorFromContract);
 
     // poll "Sync" events for reference
     const filter = contract.filters["Sync"]();
