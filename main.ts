@@ -28,7 +28,7 @@ function onSyncEventsFromQueryFilter(events: ethers.Event[]): void {
             fromContract: value?.fromContract,
             fromQueryFilter: true, // <-- mark event as "received via contact.queryFilter(...)"
             received: Date.now()
-        })  
+        })
     }
 }
 
@@ -80,5 +80,7 @@ function main() {
             onSyncEventsFromQueryFilter(events);
         })
     })
+    provider.on("poll", (pollId, blockNumber) => console.log(`polling ${pollId} (${blockNumber})`));
+    provider.on("didPoll", pollId => console.log(`polled  ${pollId}`));
 }
 main();
