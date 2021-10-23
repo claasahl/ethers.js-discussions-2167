@@ -37,10 +37,10 @@ function onErrorFromContract(error: Error, event: ethers.Event): void {
 }
 
 function lookForMissingEventsFromContract(callback: (state: State) => void) {
-    const oneMinute = 60000;
+    const halfMinute = 30000;
     for (const [key, value] of state.entries()) {
         const now = Date.now();
-        if (now - oneMinute < value.received) {
+        if (now - halfMinute < value.received) {
             // let's wait for the timeout
         } else if (value.fromContract && value.fromQueryFilter) {
             // event was received via contract.on(...) and contract.queryFilter(...)
@@ -76,7 +76,12 @@ function main() {
             fromBlock: blockNumber,
             toBlock: blockNumber
         }).then(logs => {
-            console.log(">>> logs", logs);
+            const abi = new ethers.utils.AbiCoder();
+            console.log(">>> logs", logs.map(log => {
+                const [reserve0, reserve1] = abi.decode(["uint112", "uint112"], log.data);
+                const key = `${reserve0},${reserve1}`;
+                console.log("fromGetLogs", key, log.blockNumber);
+            }));
             process.exit(1);
         }).catch(err => {
             console.log(">>> err", err);
