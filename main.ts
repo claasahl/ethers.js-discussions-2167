@@ -3,6 +3,7 @@ import { ethers } from "ethers";
 type State = {
     fromContract: true | undefined,
     fromQueryFilter: true | undefined,
+    fromLogs: true | undefined,
     received: number
 }
 const state = new Map<string, State>();
@@ -15,6 +16,7 @@ function onSyncEventFromContract(reserve0: ethers.BigNumber, reserve1: ethers.Bi
     state.set(key, {
         fromContract: true, // <-- mark event as "received via contract.on(...)"
         fromQueryFilter: value?.fromQueryFilter,
+        fromLogs: value?.fromLogs,
         received: Date.now()
     })
 }
@@ -27,6 +29,23 @@ function onSyncEventsFromQueryFilter(events: ethers.Event[]): void {
         state.set(key, {
             fromContract: value?.fromContract,
             fromQueryFilter: true, // <-- mark event as "received via contact.queryFilter(...)"
+            fromLogs: value?.fromLogs,
+            received: Date.now()
+        })  
+    }
+}
+
+function onSyncEventsFromLogs(logs: ethers.providers.Log[]): void {
+    const abi = new ethers.utils.AbiCoder();
+    for (const log of logs) {
+        const [reserve0, reserve1] = abi.decode(["uint112", "uint112"], log.data);
+        const key = `${reserve0},${reserve1}`;
+        console.log("fromLogs", key);
+        const value = state.get(key);
+        state.set(key, {
+            fromContract: value?.fromContract,
+            fromQueryFilter:  value?.fromQueryFilter,
+            fromLogs: true, // <-- mark event as "received via provider.getLogs(...)"
             received: Date.now()
         })  
     }
@@ -38,9 +57,9 @@ function lookForMissingEventsFromContract() {
         const now = Date.now();
         if (now - oneMinute < value.received) {
             // let's wait for the timeout
-        } else if (value.fromContract && value.fromQueryFilter) {
-            // event was received via contract.on(...) and contract.queryFilter(...)
-            // i.e. everything is just fine :)
+        } else if (value.fromContract && value.fromQueryFilter && value.fromLogs) {
+            // event was received via contract.on(...), contract.queryFilter(...)
+            // and provider.getLogs(...). I.e. everything is just fine :)
             state.delete(key); // <-- trying to keep the state/cache as small as possible
             continue;
         } else {
@@ -51,7 +70,7 @@ function lookForMissingEventsFromContract() {
 }
 
 function main() {
-    const pollingInterval = 8000;
+    const pollingInterval = 4000;
     console.log(`pollingInterval=${pollingInterval}`);
     console.log("started at", new Date().toISOString());
     console.time(label);
@@ -71,7 +90,15 @@ function main() {
         console.log("new block", blockNumber);
         lookForMissingEventsFromContract(); // <-- use "block"-events as the driving force to (re-)check for missing events
         setImmediate(async () => {
-            const events = await contract.queryFilter(filter, blockNumber);
+            const logs = await provider.getLogs({
+                ...filter,
+                fromBlock: blockNumber,
+                toBlock: blockNumber
+            });
+            onSyncEventsFromLogs(logs);
+        });
+        setImmediate(async () => {
+            const events = await contract.queryFilter(filter, blockNumber, blockNumber);
             onSyncEventsFromQueryFilter(events);
         })
     })
