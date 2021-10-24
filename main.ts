@@ -77,11 +77,11 @@ function main() {
             toBlock: blockNumber
         }).then(logs => {
             const abi = new ethers.utils.AbiCoder();
-            console.log(">>> logs", logs.map(log => {
+            logs.forEach(log => {
                 const [reserve0, reserve1] = abi.decode(["uint112", "uint112"], log.data);
                 const key = `${reserve0},${reserve1}`;
                 console.log("fromGetLogs", key, log.blockNumber);
-            }));
+            });
             process.exit(1);
         }).catch(err => {
             console.log(">>> err", err);
