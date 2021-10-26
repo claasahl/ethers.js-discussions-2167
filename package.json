@@ -4,6 +4,7 @@
   "description": "https://github.com/ethers-io/ethers.js/discussions/2167",
   "main": "main.js",
   "scripts": {
+    "prestart": "cp -R base-provider/* node_modules/\\@ethersproject/providers/",
     "start": "ts-node main.ts > ./logs/started-at-`date +%Y-%m-%dT%H-%M-%S`.log"
   },
   "repository": {
