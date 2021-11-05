@@ -47,7 +47,7 @@ function lookForMissingEventsFromContract(callback: (state: State) => void) {
             // i.e. everything is just fine :)
             state.delete(key); // <-- trying to keep the state/cache as small as possible
             continue;
-        } else if(value.fromQueryFilter) {
+        } else {
             console.timeLog(label, "found missing event", key, value);
             callback(value);
         }
