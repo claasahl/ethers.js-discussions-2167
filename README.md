@@ -1,5 +1,7 @@
 # Related to
-https://github.com/ethers-io/ethers.js/discussions/2167
+
+- https://github.com/ethers-io/ethers.js/discussions/2167
+- https://github.com/ethers-io/ethers.js/pull/2274
 
 ---
 
